@@ -26,19 +26,19 @@ class MainActivity : AppCompatActivity() {
 
     val handler = Handler()
 
-    var generatedFreq = 0.0
+    var isSoundGenerating = false
 
 
     //generate sound
 
-    private val duration = 10 // seconds
+    private val duration = 0.5 // seconds
 
     private val sampleRate = 8000
     private val numSamples = duration * sampleRate
-    private val sample = DoubleArray(numSamples)
+    private val sample = DoubleArray(numSamples.toInt())
     private var freqOfTone = 700.0  //440.0 // hz
 
-    private val generatedSnd = ByteArray(2 * numSamples)
+    private val generatedSnd = ByteArray((2 * numSamples).toInt())
 
 
     var audioTrack = AudioTrack(
@@ -187,20 +187,32 @@ class MainActivity : AppCompatActivity() {
 
     fun generateSound() {
 
-        // Use a new tread as this can take a while
+        var isSoundGenerating = true
         // Use a new tread as this can take a while
         val thread = Thread {
 
 
-            freqOfTone = freq_slider.value.toDouble()
+            //handler.post { playSound() }
 
 
-            genTone(freqOfTone)
+            handler.postDelayed(object : Runnable {
+                override fun run() {
 
 
+                    freqOfTone = freq_slider.value.toDouble()
+                    genTone(freqOfTone)
+                    playSound()
+                    text_view.setText(freqOfTone.toString() + " Hz")
 
 
-            handler.post { playSound() }
+                    if (isSoundGenerating.equals(true)) {
+                        handler.postDelayed(this, 500)
+                    } else {
+                        handler.removeCallbacks(this)   // moze zadziala
+                    }
+
+                }
+            }, 500)
 
 
         }
@@ -219,6 +231,8 @@ class MainActivity : AppCompatActivity() {
 
     fun stopSound() {
 
+
+        var isSoundGenerating = false
         audioTrack.flush();
         audioTrack.stop();
         audioTrack.release();
@@ -237,7 +251,7 @@ class MainActivity : AppCompatActivity() {
 
 
         // fill out the array
-        for (i in 0 until numSamples) {
+        for (i in 0 until numSamples.toInt()) {
             sample[i] = Math.sin(2 * Math.PI * i / (sampleRate / freqency))
         }
 
