@@ -2,14 +2,18 @@ package pl.piotrnarecki.recordaudiodemo
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.media.*
+import android.media.AudioFormat
+import android.media.AudioManager
 import android.media.AudioTrack
+import android.media.MediaPlayer
+import android.media.MediaRecorder
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.google.android.material.slider.Slider
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 import kotlin.experimental.and
@@ -83,6 +87,8 @@ class MainActivity : AppCompatActivity() {
         button5.setOnClickListener {
             stopSound()
         }
+
+
     }
 
     override fun onResume() {
@@ -176,10 +182,10 @@ class MainActivity : AppCompatActivity() {
         mp.start()
 
 
-        button1.isEnabled = false
-        button2.isEnabled = true
+        button1.isEnabled = true
+        button2.isEnabled = false
         button3.isEnabled = false
-        button4.isEnabled = false
+        button4.isEnabled = true
         button5.isEnabled = false
 
     }
@@ -187,46 +193,15 @@ class MainActivity : AppCompatActivity() {
 
     fun generateSound() {
 
-        var isSoundGenerating = true
-        // Use a new tread as this can take a while
+
         val thread = Thread {
 
-
-            //handler.post { playSound() }
-
-
-            handler.postDelayed(object : Runnable {
-                override fun run() {
-
-
-                    freqOfTone = freq_slider.value.toDouble()
-                    genTone(freqOfTone)
-                    playSound()
-                    text_view.setText(freqOfTone.toString() + " Hz")
-
-
-                    if (isSoundGenerating.equals(true)) {
-                        handler.postDelayed(this, 500)
-                    } else {
-                        handler.removeCallbacks(this)   // moze zadziala
-                    }
-
-                }
-            }, 500)
-
-
+            freqOfTone = freq_slider.value.toDouble()
+//            text_view.setText(freqOfTone.toString() + " Hz")
+            genTone(freqOfTone)
+            handler.post { playSound() }
         }
         thread.start()
-
-
-
-        button1.isEnabled = false
-        button2.isEnabled = false
-        button3.isEnabled = false
-
-        button4.isEnabled = false
-        button5.isEnabled = true
-
     }
 
     fun stopSound() {
